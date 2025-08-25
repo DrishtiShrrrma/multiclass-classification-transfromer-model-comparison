@@ -17,7 +17,7 @@ The aim of this project is to assess how well different transformer models perfo
 ## 📂 Repository Structure
 
 ```
-├── data/              # Preprocessed dataset (not included, due to size)
+├── data/              # Preprocessed dataset
 ├── notebooks/         # Jupyter notebooks with training/evaluation experiments
 ├── src/               # Core training and evaluation scripts
 │   ├── dataset.py     # Dataset preprocessing
