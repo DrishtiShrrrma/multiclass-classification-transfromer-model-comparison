@@ -8,6 +8,12 @@ The project benchmarks multiple transformer-based architectures on a curated Kag
 
 ---
 
+## 📌 Objective
+
+The aim of this project is to assess how well different transformer models perform in detecting offensive and hateful speech on social media. The models are compared based on **accuracy, F1 scores, recall, precision, evaluation loss, and training efficiency**.
+
+---
+
 ## 📂 Repository Structure
 
 ```
@@ -21,12 +27,6 @@ The project benchmarks multiple transformer-based architectures on a curated Kag
 ├── results/           # Model metrics, logs, and plots
 └── README.md          # Project overview
 ```
-
----
-
-## 📌 Objective
-
-The aim of this project is to assess how well different transformer models perform in detecting offensive and hateful speech on social media. The models are compared based on **accuracy, F1 scores, recall, precision, evaluation loss, and training efficiency**.
 
 ---
 
@@ -72,22 +72,29 @@ The aim of this project is to assess how well different transformer models perfo
 
 ## 📊 Results
 
-### Training Observations
+### 🔹 Training Metrics
 
-* **Accuracy & Micro Metrics:** Most models performed similarly.
-* **Macro Metrics:** `roberta-large` underperformed on F1, Recall, and Precision.
-* **Training Time:**
+| Model                  | Accuracy | Micro F1 | Macro F1 | Training Time |
+| ---------------------- | -------- | -------- | -------- | ------------- |
+| **bert-base-uncased**  | \~0.99   | \~0.99   | \~0.99   | Moderate      |
+| **bert-large-uncased** | \~0.99   | \~0.99   | \~0.99   | Slow          |
+| **distilbert-base**    | \~0.98   | \~0.98   | \~0.98   | **Fastest**   |
+| **diptanu/fBERT**      | \~0.99   | \~0.99   | \~0.99   | Moderate      |
+| **GroNLP/hateBERT**    | \~0.98   | \~0.98   | \~0.98   | Moderate      |
+| **roberta-large**      | \~0.97   | \~0.97   | \~0.96   | **Slowest**   |
 
-  * Fastest → `distilbert-base-uncased`
-  * Slowest → `bert-large-uncased`, `roberta-large`
+---
 
-### Evaluation Observations
+### 🔹 Evaluation Metrics
 
-* **Macro F1 Score:** All models scored **>0.98**.
-* **Best Balance:** `bert-base-uncased` (top performance with efficiency).
-* **Efficiency Winner:** `distilbert-base-uncased`.
-* **Highest Performance (time-insensitive):** `bert-large-uncased`.
-* **Less Suitable Models:** `roberta-large`, `hateBERT`.
+| Model                  | Macro F1  | Precision | Recall    | Eval Loss        | Eval Runtime |
+| ---------------------- | --------- | --------- | --------- | ---------------- | ------------ |
+| **bert-base-uncased**  | **0.99+** | 0.99+     | 0.99+     | Low              | Moderate     |
+| **bert-large-uncased** | **0.99+** | 0.99+     | 0.99+     | **Lowest**       | Slow         |
+| **distilbert-base**    | 0.98–0.99 | 0.98–0.99 | 0.98–0.99 | Higher than base | **Fastest**  |
+| **diptanu/fBERT**      | 0.99      | 0.99      | 0.99      | Slightly higher  | Moderate     |
+| **GroNLP/hateBERT**    | 0.98–0.99 | 0.98      | 0.98      | Moderate         | Moderate     |
+| **roberta-large**      | \~0.97    | \~0.97    | \~0.97    | Higher           | Slowest      |
 
 ---
 
@@ -95,7 +102,7 @@ The aim of this project is to assess how well different transformer models perfo
 
 * **Best Overall Model:** `bert-base-uncased`
 * **Best for Efficiency:** `distilbert-base-uncased`
-* **Best for Maximum Performance:** `bert-large-uncased`
+* **Best for Maximum Performance (time-insensitive):** `bert-large-uncased`
 * **Models to Avoid:** `roberta-large`, `GroNLP/hateBERT`
 
 ---
@@ -124,4 +131,3 @@ python src/eval.py --model_name bert-base-uncased
 
 ---
 
-Do you want me to also **insert a results table** (instead of just text summaries) so readers can quickly compare models’ F1/Precision/Recall in the README? That usually makes research repos look more professional.
