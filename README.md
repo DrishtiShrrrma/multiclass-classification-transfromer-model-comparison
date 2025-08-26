@@ -81,7 +81,7 @@ Evaluate and compare transformer models for offensive/hate speech detection on s
 
 ---
 
-## 📊 Results (Actual)
+## 📊 Results 
 
 ### A) Training Metrics
 
