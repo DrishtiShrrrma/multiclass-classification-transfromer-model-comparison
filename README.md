@@ -66,7 +66,7 @@ Evaluate and compare transformer models for offensive/hate speech detection on s
 * **Defaults:** `epochs=5`, `batch_size=16`, `learning_rate=2e-5`, `max_length=114`
 * **Class imbalance:** handled via **class-weighted CrossEntropyLoss** in a `CustomTrainer`.
 
-> You can edit these in `config/config.yaml` or override via CLI flags.
+> These settings can be configured in config/config.yaml or overridden via CLI flags.
 
 ---
 
