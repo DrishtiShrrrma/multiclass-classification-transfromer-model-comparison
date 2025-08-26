@@ -174,7 +174,3 @@ python scripts/make_figures.py --csv data/merged_dataset.csv
 # From a finished run
 python scripts/make_curves_from_state.py --state runs/bert-base-uncased/trainer_state.json --prefix bert_base
 ```
-
----
-
-if you want, I can also add a tiny `results/metrics_table.csv` generator so your README table stays in sync with saved `metrics_*.json`.
