@@ -2,60 +2,76 @@
 
 # Comprehensive Evaluation of Transformer Models for Hate Speech Detection
 
-This repository contains the code and experiments for the research project **“Comprehensive Evaluation of Various Transformer Models in Detecting Normal, Hate, and Offensive Text”**.
-
-The project benchmarks multiple transformer-based architectures on a curated Kaggle dataset to evaluate their performance in classifying tweets into **Normal**, **Hate**, and **Offensive** categories.
+This repository contains the code and experiments for the research project **“Comprehensive Evaluation of Various Transformer Models in Detecting Normal, Hate, and Offensive Text.”**
+It benchmarks several transformer architectures on a curated Kaggle dataset to classify tweets into **Normal**, **Hate**, and **Offensive** categories.
 
 ---
 
 ## 📌 Objective
 
-The aim of this project is to assess how well different transformer models perform in detecting offensive and hateful speech on social media. The models are compared based on **accuracy, F1 scores, recall, precision, evaluation loss, and training efficiency**.
+Evaluate and compare transformer models for offensive/hate speech detection on social media. Models are compared on **accuracy, F1 (macro/micro), precision, recall, evaluation loss, runtime,** and **training efficiency**.
 
 ---
 
 ## 📂 Repository Structure
 
 ```
-├── data/              # Preprocessed dataset
-├── notebooks/         # Jupyter notebooks with training/evaluation experiments
-├── src/               # Core training and evaluation scripts
-│   ├── dataset.py     # Dataset preprocessing
-│   ├── trainer.py     # CustomTrainer implementation
-│   ├── train.py       # Training pipeline
-│   └── eval.py        # Evaluation metrics
-├── results/           # Model metrics, logs, and plots
-└── README.md          # Project overview
+├── config/
+│   └── config.yaml                 # Default hyperparameters & paths
+├── data/
+│   └── README.md                   # Dataset source & expected schema (put merged CSV here)
+├── notebooks/                      # Your exploratory notebooks
+├── results/                        # Plots, confusion matrices, aggregated metrics
+├── scripts/
+│   ├── prepare_dataset.py          # Merge the 12 Kaggle CSVs → data/merged_dataset.csv
+│   ├── make_figures.py             # Label distribution & length-by-label plots
+│   └── make_curves_from_state.py   # (optional) Plot curves from trainer_state.json
+├── src/
+│   └── hate_speech_eval/
+│       ├── __init__.py
+│       ├── config.py               # Label maps & max lengths
+│       ├── data.py                 # Dataset loading & tokenization
+│       ├── metrics.py              # Accuracy / Macro & Micro F1 / Precision / Recall
+│       ├── trainer.py              # CustomTrainer with class-weighted loss
+│       ├── train.py                # Training entrypoint (supports --config)
+│       ├── evaluate.py             # Simple evaluation/prediction demo
+│       └── viz_curves.py           # Plot training/eval curves from log_history
+├── pyproject.toml
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
 ## 🔍 Dataset
 
-* **Source:** Combination of 12 Kaggle datasets.
-* **Classes:** `Normal`, `Hate`, `Offensive`.
-* **Merging & Filtering:** Datasets were merged and filtered by text length per label.
-* **Preprocessing Choices:**
+* **Source:** [https://www.kaggle.com/datasets/subhajournal/normal-hate-and-offensive-speeches](https://www.kaggle.com/datasets/subhajournal/normal-hate-and-offensive-speeches)
+* **Classes:** `Normal`, `Hate`, `Offensive`
+* **Preparation:** The original source provides **12 CSVs** (4 per class). Merge them into a single file:
 
-  * No lowercasing (case carries semantic meaning).
-  * No removal of special characters (important for obfuscated offensive text).
-  * Applied label-specific filtering.
+  ```bash
+  python scripts/prepare_dataset.py --input_dir /path/to/kaggle_csvs --out data/merged_dataset.csv
+  ```
+* **Preprocessing choices used in the study:**
+
+  * Keep case (no lowercasing) and **retain special characters** (important for obfuscation patterns).
+  * Label-specific length filtering (as explored in the article).
+  * Tokenizer max length ≈ **114** (1.3× longest sequence in Normal).
 
 ---
 
 ## ⚙️ Experimental Setup
 
-* **Hardware:** NVIDIA A100 GPU.
-
-* **Training Parameters:**
+* **Hardware:** NVIDIA A100 GPU (experiments run on A100 in the study; any CUDA GPU works)
+* **Key hyperparameters (defaults):**
 
   * Epochs: `5`
-  * Batch Size: `16`
-  * Learning Rate: `2e-5`
-  * Max Sequence Length: `~114` (1.3 × longest sequence)
+  * Batch size: `16`
+  * Learning rate: `2e-5`
+  * Max length: `114`
+* **Class imbalance:** weighted `CrossEntropyLoss` via **CustomTrainer**.
 
-* **Class Imbalance Handling:**
-  Used a **CustomTrainer** with normalized class weights in the `CrossEntropyLoss` function.
+> These can be edited in `config/config.yaml` or overridden via CLI flags.
 
 ---
 
@@ -72,62 +88,95 @@ The aim of this project is to assess how well different transformer models perfo
 
 ## 📊 Results
 
-### 🔹 Training Metrics
+### Training Metrics (illustrative summary)
 
 | Model                  | Accuracy | Micro F1 | Macro F1 | Training Time |
-| ---------------------- | -------- | -------- | -------- | ------------- |
-| **bert-base-uncased**  | \~0.99   | \~0.99   | \~0.99   | Moderate      |
-| **bert-large-uncased** | \~0.99   | \~0.99   | \~0.99   | Slow          |
-| **distilbert-base**    | \~0.98   | \~0.98   | \~0.98   | **Fastest**   |
-| **diptanu/fBERT**      | \~0.99   | \~0.99   | \~0.99   | Moderate      |
-| **GroNLP/hateBERT**    | \~0.98   | \~0.98   | \~0.98   | Moderate      |
-| **roberta-large**      | \~0.97   | \~0.97   | \~0.96   | **Slowest**   |
+| ---------------------- | -------: | -------: | -------: | ------------- |
+| **bert-base-uncased**  |   \~0.99 |   \~0.99 |   \~0.99 | Moderate      |
+| **bert-large-uncased** |   \~0.99 |   \~0.99 |   \~0.99 | Slow          |
+| **distilbert-base**    |   \~0.98 |   \~0.98 |   \~0.98 | **Fastest**   |
+| **diptanu/fBERT**      |   \~0.99 |   \~0.99 |   \~0.99 | Moderate      |
+| **GroNLP/hateBERT**    |   \~0.98 |   \~0.98 |   \~0.98 | Moderate      |
+| **roberta-large**      |   \~0.97 |   \~0.97 |   \~0.96 | **Slowest**   |
 
----
+### Evaluation Metrics (illustrative summary)
 
-### 🔹 Evaluation Metrics
+| Model                  |  Macro F1 | Precision |    Recall | Eval Loss        | Eval Runtime |
+| ---------------------- | --------: | --------: | --------: | ---------------- | -----------: |
+| **bert-base-uncased**  | **0.99+** |     0.99+ |     0.99+ | Low              |     Moderate |
+| **bert-large-uncased** | **0.99+** |     0.99+ |     0.99+ | **Lowest**       |         Slow |
+| **distilbert-base**    | 0.98–0.99 | 0.98–0.99 | 0.98–0.99 | Higher than base |  **Fastest** |
+| **diptanu/fBERT**      |      0.99 |      0.99 |      0.99 | Slightly higher  |     Moderate |
+| **GroNLP/hateBERT**    | 0.98–0.99 |      0.98 |      0.98 | Moderate         |     Moderate |
+| **roberta-large**      |    \~0.97 |    \~0.97 |    \~0.97 | Higher           |      Slowest |
 
-| Model                  | Macro F1  | Precision | Recall    | Eval Loss        | Eval Runtime |
-| ---------------------- | --------- | --------- | --------- | ---------------- | ------------ |
-| **bert-base-uncased**  | **0.99+** | 0.99+     | 0.99+     | Low              | Moderate     |
-| **bert-large-uncased** | **0.99+** | 0.99+     | 0.99+     | **Lowest**       | Slow         |
-| **distilbert-base**    | 0.98–0.99 | 0.98–0.99 | 0.98–0.99 | Higher than base | **Fastest**  |
-| **diptanu/fBERT**      | 0.99      | 0.99      | 0.99      | Slightly higher  | Moderate     |
-| **GroNLP/hateBERT**    | 0.98–0.99 | 0.98      | 0.98      | Moderate         | Moderate     |
-| **roberta-large**      | \~0.97    | \~0.97    | \~0.97    | Higher           | Slowest      |
+> Replace these with your exact run outputs when you log or export metrics to `results/`.
 
 ---
 
 ## ✅ Recommendations
 
-* **Best Overall Model:** `bert-base-uncased`
-* **Best for Efficiency:** `distilbert-base-uncased`
-* **Best for Maximum Performance (time-insensitive):** `bert-large-uncased`
-* **Models to Avoid:** `roberta-large`, `GroNLP/hateBERT`
+* **Best overall:** `bert-base-uncased`
+* **Best efficiency:** `distilbert-base-uncased`
+* **Best if time is not a constraint:** `bert-large-uncased`
+* **Less suitable here:** `roberta-large`, `GroNLP/hateBERT`
 
 ---
 
 ## 🚀 Getting Started
 
-### Installation
+### 1) Install dependencies
 
 ```bash
-git clone https://github.com/DrishtiShrrrma/multiclass-classification-transfromer-model-comparison.git
-cd multiclass-classification-transfromer-model-comparison
 pip install -r requirements.txt
+# (optional) developer mode
+pip install -e .
 ```
 
-### Training a Model
+### 2) Prepare data
 
 ```bash
-python src/train.py --model_name bert-base-uncased --epochs 5 --batch_size 16
+python scripts/prepare_dataset.py --input_dir /path/to/kaggle_csvs --out data/merged_dataset.csv
 ```
 
-### Evaluating a Model
+### 3) Train (via YAML config)
 
 ```bash
-python src/eval.py --model_name bert-base-uncased
+python -m hate_speech_eval.train --config config/config.yaml
+```
+
+> Or override on the CLI:
+
+```bash
+python -m hate_speech_eval.train \
+  --model_name bert-base-uncased --epochs 5 --batch_size 16 \
+  --lr 2e-5 --max_length 114 --data data/merged_dataset.csv \
+  --out runs/bert-base-uncased
+```
+
+### 4) Evaluate / quick predictions
+
+```bash
+python -m hate_speech_eval.evaluate --model_name bert-base-uncased --ckpt runs/bert-base-uncased --csv data/merged_dataset.csv
+```
+
+### 5) Generate figures (no training needed)
+
+```bash
+python scripts/make_figures.py --csv data/merged_dataset.csv
+# outputs: results/label_distribution.png, results/length_by_label.png
+```
+
+### 6) Plot training curves (after a run)
+
+```bash
+python scripts/make_curves_from_state.py \
+  --state runs/bert-base-uncased/trainer_state.json \
+  --prefix bert_base
+# outputs under results/: bert_base_eval_loss.png, bert_base_eval_macro_f1.png, etc.
 ```
 
 ---
 
+
+If you want, I can now slot in a **Results** section that auto-updates from `results/metrics_*.json` (via a tiny aggregator script) and add image references for your plots.
