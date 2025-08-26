@@ -101,3 +101,13 @@ def main():
         "macro_precision": eval_out.get("eval_macro_precision") or eval_out.get("macro_precision"),
         "eval_loss": eval_out.get("eval_loss"),
         "eval_runtime": eval_out.get("eval_runtime"),
+        "training_time_sec": round(train_time_sec, 2),
+        "evaluation_time_sec": round(eval_time_sec, 2),
+    }
+    out_path = f"results/metrics_{model_slug}.json"
+    with open(out_path, "w") as f:
+        json.dump(metrics, f, indent=2)
+    print(f"[saved] {out_path}\n", json.dumps(metrics, indent=2))
+
+if __name__ == "__main__":
+    main()
