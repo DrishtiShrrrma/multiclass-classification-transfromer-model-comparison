@@ -1,0 +1,1 @@
+from .config import LABELS, LABEL2ID, ID2LABEL, DEFAULT_MAX_LENGTH
