@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hate-speech-eval"
+version = "0.1.0"
+description = "Benchmarking transformer models for Normal/Hate/Offensive tweet classification"
+authors = [{name = "Drishti Sushma"}]
+requires-python = ">=3.9"
+dependencies = [
+  "torch",
+  "transformers>=4.38.0",
+  "datasets",
+  "evaluate",
+  "scikit-learn",
+  "pandas",
+  "numpy",
+  "tqdm",
+  "matplotlib",
+  "accelerate",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
